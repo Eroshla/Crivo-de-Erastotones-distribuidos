@@ -1,4 +1,6 @@
 .vscode
 
 *.csv
-resultados_eratostenes.txt
+*.txt
+singular
+distribuido

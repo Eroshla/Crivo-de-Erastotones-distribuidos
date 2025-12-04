@@ -30,9 +30,9 @@ Medicao crivoDeEratostenes(int n) {
     int limite = sqrt(n + 1);
     int chunk = (limite - 2 + size - 1) / size;
     int ini = 2 + rank * chunk;
-    int fim = min(ini + chunk, limite + 1);
+    int fimIntervalo = min(ini + chunk, limite + 1);
     
-    for (int p = ini; p < fim; p++) {
+    for (int p = ini; p < fimIntervalo; p++) {
         if (isPrimo[p]) {
             for (int i = p * p; i <= n + 1; i += p) {
                 isPrimo[i] = 0;
@@ -51,10 +51,10 @@ Medicao crivoDeEratostenes(int n) {
         }
     }
     
-    auto fim = high_resolution_clock::now();
+    auto fimTotal = high_resolution_clock::now();
     
     if (rank == 0) {
-        medicao.tempoTotal = duration_cast<microseconds>(fim - inicio).count();
+        medicao.tempoTotal = duration_cast<microseconds>(fimTotal - inicio).count();
         medicao.tempoSequencial = duration_cast<microseconds>(fimSeq - inicioSeq).count();
         medicao.tempoParalelizavel = duration_cast<microseconds>(fimParal - inicioParal).count();
         medicao.quantidadePrimos = primos.size();
