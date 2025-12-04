@@ -151,29 +151,37 @@ int main(){
 
     if (rank == 0) {
         cout << "CRIVO DE ERATÓSTENES - CONFIGURAÇÃO\n";
-        cout << "\nQuantos tamanhos diferentes você quer testar? ";
-        cin >> qtd;
+        
+        ifstream teste("test.txt");
+        if (!teste.is_open()) {
+            cout << "Erro: arquivo test.txt não encontrado!" << endl;
+            MPI_Abort(MPI_COMM_WORLD, 1);
+        }
+        
+        teste >> qtd;
         
         if (qtd > 10) {
             cout << "Limitando a 10 tamanhos" << endl;
             qtd = 10;
         }
-    }
-    
-    MPI_Bcast(&qtd, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    tamanhos.resize(qtd);
-    
-    if (rank == 0) {
-        cout << "\nDigite os " << qtd << " tamanhos dos arrays:\n";
+        
+        tamanhos.resize(qtd);
+        
         for(int i = 0; i < qtd; i++){
-            cout << "  Tamanho " << (i+1) << ": ";
-            cin >> tamanhos[i];
+            teste >> tamanhos[i];
         }
+        teste.close();
         
         cout << "\nRESUMO\n";
         cout << "Tamanhos a testar: ";
         for(int t : tamanhos) cout << t << " ";
         cout << "\nMedições por tamanho: " << numMedicoes << endl;
+    }
+    
+    MPI_Bcast(&qtd, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    
+    if (rank != 0) {
+        tamanhos.resize(qtd);
     }
     
     MPI_Bcast(tamanhos.data(), qtd, MPI_INT, 0, MPI_COMM_WORLD);

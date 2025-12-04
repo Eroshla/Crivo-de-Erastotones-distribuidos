@@ -25,7 +25,7 @@ Medicao crivoDeEratostenes(int n) {
         int divisor = erastotones[j];
         for(int c = erastotones.size() - 1; c >= 0; c--){
             if(c != j && erastotones[c] % divisor == 0){
-                erastotenes.erase(erastotones.begin() + c);
+                erastotones.erase(erastotones.begin() + c);
             }
         }
     }
@@ -48,16 +48,20 @@ int main(){
     vector<int> tamanhos;
 
     cout << "CRIVO DE ERATÓSTENES - CONFIGURAÇÃO\n";
-    cout << "\nQuantos tamanhos diferentes você quer testar? ";
-    cin >> Qtd_testes;
     
+    ifstream teste("test.txt");
+    if (!teste.is_open()) {
+        cout << "Erro: arquivo test.txt não encontrado!" << endl;
+        return 1;
+    }
+    
+    teste >> Qtd_testes;
     tamanhos.resize(Qtd_testes);
     
-    cout << "\nDigite os " << Qtd_testes << " tamanhos dos arrays:\n";
     for(int i = 0; i < Qtd_testes; i++){
-        cout << "  Tamanho " << (i+1) << ": ";
-        cin >> tamanhos[i];
+        teste >> tamanhos[i];
     }
+    teste.close();
     
     int numMedicoes = 5;
     
