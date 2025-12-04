@@ -70,30 +70,10 @@ void realizarExperimentos(const vector<int>& tamanhos, int numMedicoes,
                 << m.numProcessos << "\n";
             
             txt << "Medição #" << (i + 1) << ":\n";
-            txt << "{\n";
-            txt << "  tamanho: " << tamanho << ",\n";
-            txt << "  medicao: " << (i + 1) << ",\n";
-            txt << "  numProcessos: " << m.numProcessos << ",\n";
-            txt << "  tempoTotal_us: " << m.tempoTotal << ",\n";
-            txt << "  tempoParalelizavel_us: " << m.tempoParalelizavel << ",\n";
-            txt << "  tempoSequencial_us: " << m.tempoSequencial << ",\n";
-            txt << "  quantidadePrimos: " << m.quantidadePrimos << ",\n";
-            txt << fixed << setprecision(2);
-            txt << "  fracaoParalelizavel_pct: " << fracaoParal << ",\n";
-            txt << setprecision(4);
-            txt << "  speedupMaximoTeorico: " << speedupMaxTeorico << ",\n";
-            txt << "  primos: [\n    ";
-            
-            for(size_t p = 0; p < m.primos.size(); p++){
-                txt << setw(6) << m.primos[p];
-                if(p < m.primos.size() - 1) txt << ",";
-                
-                if((p + 1) % 10 == 0 && p < m.primos.size() - 1){
-                    txt << "\n    ";
-                }
-            }
-            txt << "\n  ]\n";
-            txt << "}\n\n";
+            txt << "  tempoTotal_us: " << m.tempoTotal 
+                << ", tempoParalelizavel_us: " << m.tempoParalelizavel 
+                << ", tempoSequencial_us: " << m.tempoSequencial 
+                << ", quantidadePrimos: " << m.quantidadePrimos << "\n";
             
             cout << " OK (" << m.quantidadePrimos << " primos)" << endl;
         }

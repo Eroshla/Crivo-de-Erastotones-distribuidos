@@ -59,9 +59,7 @@ int main(){
         cin >> tamanhos[i];
     }
     
-    int numMedicoes;
-    cout << "\nQuantas medições por tamanho? (recomendado: 5): ";
-    cin >> numMedicoes;
+    int numMedicoes = 5;
     
     cout << "\nRESUMO\n";
     cout << "Tamanhos a testar: ";
