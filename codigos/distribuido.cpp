@@ -138,44 +138,56 @@ Medicao crivoDeEratostenes(int n) {
     return medicao;
 }
 
-int main(){
-    MPI_Init(NULL, NULL);
+int main(int argc, char** argv){
+    MPI_Init(&argc, &argv);
     
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
+    
+    char processor_name[MPI_MAX_PROCESSOR_NAME];
+    int name_len;
+    MPI_Get_processor_name(processor_name, &name_len);
+    
+    cout << "[RANK " << rank << "] Processo iniciado no host: " << processor_name 
+         << " (PID: " << getpid() << ")" << endl;
     
     int qtd;
     vector<int> tamanhos;
     int numMedicoes = 5;
 
     if (rank == 0) {
-        cout << "CRIVO DE ERATÓSTENES - CONFIGURAÇÃO\n";
-        
-        ifstream teste("test.txt");
-        if (!teste.is_open()) {
-            cout << "Erro: arquivo test.txt não encontrado!" << endl;
+        if (argc < 3) {
+            cout << "Uso: mpirun -np N ./distribuido <qtd_tamanhos> <tamanho1> <tamanho2> ..." << endl;
+            cout << "Exemplo: mpirun -np 8 ./distribuido 3 1000 10000 100000" << endl;
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
         
-        teste >> qtd;
+        cout << "\n[RANK 0] CRIVO DE ERATÓSTENES - CONFIGURAÇÃO\n";
+        
+        qtd = atoi(argv[1]);
         
         if (qtd > 10) {
-            cout << "Limitando a 10 tamanhos" << endl;
+            cout << "[RANK 0] Limitando a 10 tamanhos" << endl;
             qtd = 10;
+        }
+        
+        if (argc < 2 + qtd) {
+            cout << "[RANK 0] Erro: esperado " << qtd << " tamanhos, mas recebeu " << (argc - 2) << endl;
+            MPI_Abort(MPI_COMM_WORLD, 1);
         }
         
         tamanhos.resize(qtd);
         
         for(int i = 0; i < qtd; i++){
-            teste >> tamanhos[i];
+            tamanhos[i] = atoi(argv[2 + i]);
         }
-        teste.close();
         
-        cout << "\nRESUMO\n";
-        cout << "Tamanhos a testar: ";
+        cout << "\n[RANK 0] RESUMO\n";
+        cout << "[RANK 0] Tamanhos a testar: ";
         for(int t : tamanhos) cout << t << " ";
-        cout << "\nMedições por tamanho: " << numMedicoes << endl;
+        cout << "\n[RANK 0] Medições por tamanho: " << numMedicoes << endl;
+        cout << "[RANK 0] Total de processos: " << size << endl;
     }
     
     MPI_Bcast(&qtd, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -186,18 +198,20 @@ int main(){
     
     MPI_Bcast(tamanhos.data(), qtd, MPI_INT, 0, MPI_COMM_WORLD);
     
+    cout << "[RANK " << rank << "] Recebeu " << qtd << " tamanhos para processar" << endl;
+    
     MPI_Barrier(MPI_COMM_WORLD);
     
     if (rank == 0) {
-        cout << "\nINICIANDO EXPERIMENTOS (" << size << " processos)\n";
+        cout << "\n[RANK 0] INICIANDO EXPERIMENTOS (" << size << " processos)\n";
         
         for (int tamanho : tamanhos) {
-            cout << "\nProcessando tamanho: " << tamanho << endl;
+            cout << "\n[RANK 0] ===== Processando tamanho: " << tamanho << " =====" << endl;
             
             vector<Medicao> medicoes;
             
             for (int i = 0; i < numMedicoes; i++) {
-                cout << "  Medição " << (i + 1) << "/" << numMedicoes << "...";
+                cout << "[RANK 0] Medição " << (i + 1) << "/" << numMedicoes << "..." << flush;
                 
                 Medicao m = crivoDeEratostenes(tamanho);
                 medicoes.push_back(m);
@@ -219,22 +233,29 @@ int main(){
             double pMedia = (mediaParal > 0) ? mediaParal / mediaTempo : 0.0;
             double speedupMaxTeorico = (pMedia > 0 && pMedia < 1.0) ? 1.0 / (1.0 - pMedia) : 1.0;
             
-            cout << "\n  MÉDIAS:" << endl;
-            cout << "    Tempo total: " << mediaTempo << " us" << endl;
-            cout << "    Tempo paralelo: " << mediaParal << " us" << endl;
-            cout << "    Tempo sequencial: " << mediaSeq << " us" << endl;
-            cout << "    Fração paralelizável: " << fixed << setprecision(2) << fracaoParalMedia << "%" << endl;
-            cout << "    Speedup máximo teórico: " << setprecision(4) << speedupMaxTeorico << "x" << endl;
+            cout << "\n[RANK 0] MÉDIAS para tamanho " << tamanho << ":" << endl;
+            cout << "[RANK 0]   Tempo total: " << mediaTempo << " us" << endl;
+            cout << "[RANK 0]   Tempo paralelo: " << mediaParal << " us" << endl;
+            cout << "[RANK 0]   Tempo sequencial: " << mediaSeq << " us" << endl;
+            cout << "[RANK 0]   Fração paralelizável: " << fixed << setprecision(2) << fracaoParalMedia << "%" << endl;
+            cout << "[RANK 0]   Speedup máximo teórico: " << setprecision(4) << speedupMaxTeorico << "x" << endl;
         }
         
-        cout << "\nEXPERIMENTOS CONCLUÍDOS\n";
+        cout << "\n[RANK 0] EXPERIMENTOS CONCLUÍDOS\n";
     } else {
+        cout << "[RANK " << rank << "] Iniciando modo worker..." << endl;
         for (int t : tamanhos) {
+            cout << "[RANK " << rank << "] Processando tamanho " << t << "..." << endl;
             for (int i = 0; i < numMedicoes; i++) {
+                cout << "[RANK " << rank << "] Medição " << (i+1) << "/" << numMedicoes << " de tamanho " << t << endl;
                 crivoDeEratostenes(t);
             }
         }
+        cout << "[RANK " << rank << "] Worker finalizado" << endl;
     }
+    
+    MPI_Barrier(MPI_COMM_WORLD);
+    cout << "[RANK " << rank << "] Finalizando..." << endl;
     
     MPI_Finalize();
     return 0;
