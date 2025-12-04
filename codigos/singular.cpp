@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include "experimentos.h"
+#include "../utils/experimentos.h"
 
 using namespace std;
 using namespace chrono;
@@ -11,24 +11,34 @@ Medicao crivoDeEratostenes(int n) {
     Medicao medicao;
     auto inicio = high_resolution_clock::now();
     
+    // REGIÃO SEQUENCIAL: Inicialização do vetor
+    auto inicioSeq = high_resolution_clock::now();
     vector<int> erastotones;
     for(int j = 0; j < n; j++){
         erastotones.push_back(j + 2);
     }
+    auto fimSeq = high_resolution_clock::now();
     
+    // REGIÃO PARALELIZÁVEL: Marcação de múltiplos
+    auto inicioParal = high_resolution_clock::now();
     for(int j = 0; j < erastotones.size(); j++){
         int divisor = erastotones[j];
         for(int c = erastotones.size() - 1; c >= 0; c--){
             if(c != j && erastotones[c] % divisor == 0){
-                erastotones.erase(erastotones.begin() + c);
+                erastotenes.erase(erastotones.begin() + c);
             }
         }
     }
+    auto fimParal = high_resolution_clock::now();
     
     auto fim = high_resolution_clock::now();
+    
     medicao.tempoTotal = duration_cast<microseconds>(fim - inicio).count();
+    medicao.tempoSequencial = duration_cast<microseconds>(fimSeq - inicioSeq).count();
+    medicao.tempoParalelizavel = duration_cast<microseconds>(fimParal - inicioParal).count();
     medicao.quantidadePrimos = erastotones.size();
     medicao.primos = erastotones;
+    medicao.numProcessos = 1;
     
     return medicao;
 }
@@ -58,7 +68,7 @@ int main(){
     for(int t : tamanhos) cout << t << " ";
     cout << "\nMedições por tamanho: " << numMedicoes << endl;
     
-    realizarExperimentos(tamanhos, numMedicoes, crivoDeEratostenes);
+    realizarExperimentos(tamanhos, numMedicoes, crivoDeEratostenes, "_singular");
 
     return 0;
 }
