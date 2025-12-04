@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iomanip>
 #include <sstream>
+#include <unistd.h>
 
 using namespace std;
 using namespace chrono;
