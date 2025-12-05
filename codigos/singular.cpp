@@ -1,17 +1,24 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
-#include "../utils/experimentos.h"
+#include <iomanip>
 
 using namespace std;
 using namespace chrono;
 
-// FUNÇÃO PRINCIPAL - CRIVO DE ERATÓSTENES (parte que será distribuída)
+struct Medicao {
+    long long tempoTotal;
+    long long tempoParalelizavel;
+    long long tempoSequencial;
+    int quantidadePrimos;
+    vector<int> primos;
+    int numProcessos;
+};
+
 Medicao crivoDeEratostenes(int n) {
     Medicao medicao;
     auto inicio = high_resolution_clock::now();
     
-    // REGIÃO SEQUENCIAL: Inicialização do vetor
     auto inicioSeq = high_resolution_clock::now();
     vector<int> erastotones;
     for(int j = 0; j < n; j++){
@@ -19,7 +26,6 @@ Medicao crivoDeEratostenes(int n) {
     }
     auto fimSeq = high_resolution_clock::now();
     
-    // REGIÃO PARALELIZÁVEL: Marcação de múltiplos
     auto inicioParal = high_resolution_clock::now();
     for(int j = 0; j < erastotones.size(); j++){
         int divisor = erastotones[j];
@@ -43,34 +49,33 @@ Medicao crivoDeEratostenes(int n) {
     return medicao;
 }
 
-int main(){
-    int Qtd_testes;
-    vector<int> tamanhos;
-
-    cout << "CRIVO DE ERATÓSTENES - CONFIGURAÇÃO\n";
-    
-    ifstream teste("test.txt");
-    if (!teste.is_open()) {
-        cout << "Erro: arquivo test.txt não encontrado!" << endl;
+int main(int argc, char** argv){
+    if (argc < 3) {
+        cout << "Uso: ./singular <qtd> <tamanho1> <tamanho2> ..." << endl;
+        cout << "Exemplo: ./singular 3 10 100 1000" << endl;
         return 1;
     }
     
-    teste >> Qtd_testes;
-    tamanhos.resize(Qtd_testes);
+    int qtd = atoi(argv[1]);
+    vector<int> tamanhos(qtd);
     
-    for(int i = 0; i < Qtd_testes; i++){
-        teste >> tamanhos[i];
+    for(int i = 0; i < qtd; i++){
+        tamanhos[i] = atoi(argv[2 + i]);
     }
-    teste.close();
     
-    int numMedicoes = 5;
-    
-    cout << "\nRESUMO\n";
-    cout << "Tamanhos a testar: ";
+    cout << "CRIVO DE ERATÓSTENES - SINGULAR\n";
+    cout << "Tamanhos: ";
     for(int t : tamanhos) cout << t << " ";
-    cout << "\nMedições por tamanho: " << numMedicoes << endl;
+    cout << "\n\n";
     
-    realizarExperimentos(tamanhos, numMedicoes, crivoDeEratostenes, "_singular");
+    for (int tamanho : tamanhos) {
+        cout << "Tamanho " << tamanho << ": ";
+        
+        Medicao m = crivoDeEratostenes(tamanho);
+        
+        cout << m.quantidadePrimos << " primos em " 
+             << m.tempoTotal << " us" << endl;
+    }
 
     return 0;
 }
