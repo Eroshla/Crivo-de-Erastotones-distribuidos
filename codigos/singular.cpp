@@ -73,8 +73,10 @@ int main(int argc, char** argv){
         
         Medicao m = crivoDeEratostenes(tamanho);
         
+        double segundos = m.tempoTotal / 1000000.0;
+        
         cout << m.quantidadePrimos << " primos em " 
-             << m.tempoTotal << " us" << endl;
+             << fixed << setprecision(6) << segundos << " s" << endl;
     }
 
     return 0;

@@ -179,10 +179,15 @@ int main(int argc, char** argv) {
                 somaS += m.tempoSequencial;
             }
 
+            double mediaTotal = (somaT / numMedicoes) / 1000000.0;
+            double mediaParal = (somaP / numMedicoes) / 1000000.0;
+            double mediaSeq = (somaS / numMedicoes) / 1000000.0;
+
             cout << "Tamanho " << t << ": "
-                 << "MediaTotal(us)=" << somaT / numMedicoes << " "
-                 << "MediaParal(us)=" << somaP / numMedicoes << " "
-                 << "MediaSeq(us)=" << somaS / numMedicoes << endl;
+                 << fixed << setprecision(6)
+                 << "MediaTotal=" << mediaTotal << "s "
+                 << "MediaParal=" << mediaParal << "s "
+                 << "MediaSeq=" << mediaSeq << "s" << endl;
         }
     } else {
         for (int t : tamanhos)
