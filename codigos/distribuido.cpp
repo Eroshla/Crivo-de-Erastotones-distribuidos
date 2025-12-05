@@ -21,11 +21,9 @@ Medicao crivoDeEratostenes(int n) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // --- Timers MPI ---
     double t0_total = MPI_Wtime();
     double t0_seq   = MPI_Wtime();
 
-    // --- Primos base ---
     int limite = (int)floor(sqrt((double)n + 1.0));
     vector<int> primosBase;
     if (rank == 0) {
@@ -51,7 +49,6 @@ Medicao crivoDeEratostenes(int n) {
 
     double t1_seq = MPI_Wtime();
 
-    // --- Paralelo ---
     double t0_par = MPI_Wtime();
 
     long long start_index = 2;
@@ -87,7 +84,6 @@ Medicao crivoDeEratostenes(int n) {
     int total_primos = 0;
     MPI_Reduce(&primos_locais, &total_primos, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
 
-    // --- Coleta dos vetores ---
     int meu_count = primos_encontrados.size();
     vector<int> counts(size);
     MPI_Gather(&meu_count, 1, MPI_INT, counts.data(), 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -117,7 +113,6 @@ Medicao crivoDeEratostenes(int n) {
     double t1_par = MPI_Wtime();
     double t1_total = MPI_Wtime();
 
-    // --- Redução dos tempos usando MAX ---
     double dur_total_local = t1_total - t0_total;
     double dur_seq_local   = t1_seq - t0_seq;
     double dur_par_local   = t1_par - t0_par;
